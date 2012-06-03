@@ -8,4 +8,6 @@ clear
 ./Scrub.py "???"
 ./Scrub.py "Profit"
 ./Scrub.py -t
+./Scrub.py
+./Scrub.py -t
 echo done.

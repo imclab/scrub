@@ -8,18 +8,24 @@ class Scrubber:
     
     def __init__(self):
         self.__create_db()
-        pass
     
     def init(self):
         """ Initializes the todo list. """
         self.__init_db()
-        pass
     
     def scrub(self):
         """ Scrubs the items in the todo list flagged as 'today' or 'later'. """
-        pass
+        con = sqlite3.connect('todo.db')
+        with con:
+            con.row_factory = sqlite3.Row
+            cur = con.cursor()
+            cur.execute('select * from items where flag is not "n"')
+            rows = cur.fetchall()
+            for row in rows:
+                flag = raw_input(row['memo'] + '? (t,l,n) ')
+                cur.execute('update items set flag = ? where id = ?', (flag, row['id']))
     
-    def add(self, item, flag = 't'):
+    def add(self, item, flag = ''):
         """ Adds an item to the todo list. """
         con = sqlite3.connect('todo.db')
         with con:
@@ -35,10 +41,13 @@ class Scrubber:
         with con:
             con.row_factory = sqlite3.Row
             cur = con.cursor()
-            cur.execute('select * from items')
+            if flag is None:
+                cur.execute('select * from items')
+            else:
+                cur.execute('select * from items where flag = ?', (flag))
             rows = cur.fetchall()
             for row in rows:
-                print "%s %s %s" % (row['id'], row['flag'], row['memo'])
+                print "%s %s" % (row['flag'], row['memo'])
     
     def __create_db(self):
         con = sqlite3.connect('todo.db')
@@ -57,7 +66,7 @@ if __name__ == "__main__":
 
     scrubber = Scrubber();
 
-    if len(sys.argv) < 1:
+    if len(sys.argv) < 2:
         scrubber.scrub()
     elif sys.argv[1] == '-t':
         scrubber.get('t')
