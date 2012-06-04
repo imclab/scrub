@@ -69,10 +69,10 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description="Scrub is a simple todo list")
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('-t', action="store_true")
-    group.add_argument('-l', action="store_true")
-    parser.add_argument('--init', action="store_true")
-    parser.add_argument('memo', action="store", nargs="*")
+    group.add_argument('-t', action="store_true", help="show todo items flagged 'today'")
+    group.add_argument('-l', action="store_true", help="show todo items flagged 'later'")
+    parser.add_argument('--init', action="store_true", help="initialize the todo list")
+    parser.add_argument('memo', action="store", nargs="*", type=str, help="some text to describe a todo item")
     
     scrubber = Scrubber()
     args = parser.parse_args()
