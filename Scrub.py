@@ -1,6 +1,6 @@
 #! /usr/bin/env python
+import argparse
 import sqlite3
-import sys
 
 class Scrubber:
     
@@ -25,12 +25,13 @@ class Scrubber:
                 flag = raw_input(row['memo'] + '? (t,l,n) ')
                 cur.execute('update items set flag = ? where id = ?', (flag, row['id']))
     
-    def add(self, item, flag = ''):
+    def add(self, items, flag = 'l'):
         """ Adds an item to the todo list. """
         con = sqlite3.connect('todo.db')
         with con:
             cur = con.cursor()
-            cur.execute('insert into items(flag, memo) values (?, ?)', (flag, item))
+            for item in items:
+                cur.execute('insert into items(flag, memo) values (?, ?)', (flag, item))
     
     def get(self, flag = None):
         """ 
@@ -62,15 +63,22 @@ class Scrubber:
             cur.execute('drop table if exists items')
             cur.execute('create table items(id INTEGER PRIMARY KEY AUTOINCREMENT, flag TEXT, memo TEXT)')
 
+
+
 if __name__ == "__main__":
-
-    scrubber = Scrubber();
-
-    if len(sys.argv) < 2:
-        scrubber.scrub()
-    elif sys.argv[1] == '-t':
-        scrubber.get('t')
-    elif sys.argv[1] == '--init':
-        scrubber.init()
-    else:
-        scrubber.add(sys.argv[1])
+    
+    parser = argparse.ArgumentParser(description="Scrub is a simple todo list")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('-t', action="store_true")
+    group.add_argument('-l', action="store_true")
+    parser.add_argument('--init', action="store_true")
+    parser.add_argument('memo', action="store", nargs="*")
+    
+    scrubber = Scrubber()
+    args = parser.parse_args()
+    
+    if args.init: scrubber.init()
+    elif args.t: scrubber.get('t')
+    elif args.l: scrubber.get('l')
+    elif len(args.memo): scrubber.add(args.memo)
+    else: scrubber.scrub()
